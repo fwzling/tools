@@ -6,20 +6,13 @@
 #  to save space
 #
 
-CurrWD = Dir.pwd
-
-puts "<<< Start process duplicated so files >>> "
-resolve_folder(CurrWD.dup)
-puts "<<< Finished >>>"
-Dir.chdir(CurrWD)
-
 ##
 # @path: {String}  absolute path of the folder
 def resolve_folder(path)
   sub_dirs, so_files = [], []
 
   Dir.entries(path).each do |ent|
-    if File.directory?(File.join(path, ent)) && not [".", ".."].include?(ent)
+    if File.directory?(File.join(path, ent)) && (not [".", ".."].include?(ent))
       sub_dirs << ent
     elsif ent.match(/\.so(?:\.\d+)*$/)   # match abc.so, abc.so.1, abc.so.1.10
       so_files << ent
@@ -47,7 +40,7 @@ def resolve_so_files(path, so_files)
   last_seen = "this.never.will.be.seen"
   so_files.each do |f|
     begin
-      if last_seen.match(/^#{f}/) && not File.symlink?(f) && File.size(f) == File.size(last_seen)
+      if last_seen.match(/^#{f}/) && (not File.symlink?(f)) && File.size(f) == File.size(last_seen)
         # remove the f, then create symbolic link to the object with more specific version
         puts "[REMOVE] #{File.join(path, f)}"
         File.delete(f)
@@ -61,3 +54,12 @@ def resolve_so_files(path, so_files)
     end
   end
 end
+
+## ------------------ main ------------------- ##
+
+CurrWD = Dir.pwd
+
+puts "<<< Start process duplicated so files >>> "
+resolve_folder(CurrWD)
+puts "<<< Finished >>>"
+Dir.chdir(CurrWD)
