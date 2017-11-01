@@ -103,6 +103,23 @@ CHECK_COMMAND="cppcheck --enable=performance,portability,missingInclude \
                         -I ./src/uos_cv_vogm/include \
                         -I ./src/uos_camera/include \
                         -I ./src/ucs_rcslib/rcslib/include \
+                        -I ./src/uos_chassis/include \
+                        -I ./src/uos_cv_lanedet/uos_lanedet_t/include \
+                        -I ./src/uos_gps/include \
+                        -I ./src/uos_io/include \
+                        -I ./src/uos_lateralctrl/include \
+                        -I ./src/uos_lidar/include \
+                        -I ./src/uos_local_planner/include \
+                        -I ./src/uos_lslam/carto/include \
+                        -I ./src/uos_map_planner/include \
+                        -I ./src/uos_mot/uos_mot_lidar/include \
+                        -I ./src/uos_navigation/include \
+                        -I ./src/uos_park_planner/include \
+                        -I ./src/uos_planner_base/include \
+                        -I ./src/uos_sl_lidar/include \
+                        -I ./src/uos_track_planner/include \
+                        -I ./src/uos_vlane_planner/include \
+                        -I ./src/uos_vrep/include \
                         --suppressions-list=$SUPP_LIST \
                         --suppress=missingIncludeSystem \
                         --xml -j 4 src"
