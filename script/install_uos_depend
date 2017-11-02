@@ -1,0 +1,157 @@
+#!/usr/bin/env ruby
+
+#################################################################
+#  Script to generate a customized uos_depend.                  #
+#  Usage:                                                       #
+#  install_uos_depend -i /path/a -o /path/b -r 16.04 -t arm     #
+#  Custom options:                                              #
+#     -i|--in /path/to/original/uos_depend                      #
+#     -o|--out /path/to/output/customized/uos_depend            #
+#     -r|--rel [14.04|16.04]                                    #
+#     -t|--tgt [x86|arm]                                        #
+#################################################################
+
+require 'optparse'
+require 'fileutils'
+
+@options = {}
+
+def parse_options(args)
+  opt_parser = OptionParser.new do |opts|
+    opts.banner = "Script to generate a customized uos_depend."
+    opts.separator "Usage: install_uos_depend [options]"
+    opts.separator "Specific options:"
+
+    opts.on("-i", "--in [PATH]", String, "Path to original uos_depend") do |path|
+      if not Dir.exist?(path)
+        puts "ERROR: directory does not exist, #{path}"
+        exit 1
+      end
+      @options[:input] = path
+    end
+
+    opts.on("-o", "--out [PATH]", String, "Path to the costomized output path") do |path|
+      if not Dir.exist?(path)
+        puts "ERROR: directory does not exist, #{path}"
+        exit 1
+      end
+      @options[:output] = path
+    end
+
+    opts.on("-r", "--rel [RELEASE]", String, "Ubuntu release [14.04|16.04]") do |rel|
+      if not ['14.04', '16.04'].include?(rel)
+        puts "ERROR: release #{rel} is not supported"
+      end
+      @options[:release] = rel
+    end
+
+    opts.on("-t", '--tgt [ARCH]', String, "CPU Arch [x86|arm]") do |arch|
+      if not ['x86', 'arm'].include?(arch)
+        puts "ERROR: target #{arch} is not supported"
+      end
+      @options[:target] = arch
+    end
+
+    opts.on_tail("-h", "--help", "Show this message") do
+      puts opts
+      exit 0
+    end
+  end
+
+  opt_parser.parse!(args)
+
+  [:input, :output, :release, :target].each do |required|
+    if @options[required].nil?
+      puts "ERROR: required option missing, #{required}"
+      exit 1
+    end
+  end
+end
+
+def components
+  dirs = {}  # key: original dir, value: destination dir
+  opts = @options
+  if opts[:target].eql?("x86")
+    tgt_lib = "lib"
+  else
+    tgt_lib = "lib-arm"
+  end
+  # boost
+  dirs.merge!({
+      "boost/#{opts[:release]}/include" => "boost/include",
+      "boost/#{opts[:release]}/#{tgt_lib}" => "boost/#{tgt_lib}"
+  })
+  # carto
+  dirs.merge!({
+      "carto/#{opts[:release]}/include" => "carto/include",
+      "carto/#{opts[:release]}/#{tgt_lib}" => "carto/#{tgt_lib}"
+  })
+  # eigen3
+  dirs.merge!({
+      "eigen3/include" => "eigen3/include"
+  })
+  # gmock
+  dirs.merge!({
+      "gmock/include" => "gmock/include",
+      "gmock/share" => "gmock/share",
+      "gmock/lib" => "gmock/lib"
+  })
+  # internal
+  dirs.merge!({
+      "internal" => "internal"
+  })
+  # mrpt
+  dirs.merge!({
+      "mrpt/include" => "mrpt/include",
+      "mrpt/lib" => "mrpt/lib"
+  })
+  # ncurses
+  dirs.merge!({
+      "ncurses/include" => "ncurses/include",
+      "ncurses/#{tgt_lib}" => "ncurses/#{tgt_lib}",
+      "ncurses/share" => "ncurses/share"
+  })
+  # others
+  dirs.merge!({
+      "others/#{opts[:release]}/#{tgt_lib}" => "others/#{tgt_lib}"
+  })
+  # pcap
+  dirs.merge!({
+      "pcap/include" => "pcap/include",
+      "pcap/#{tgt_lib}" => "pcap/#{tgt_lib}"
+  })
+  # pcl
+  dirs.merge!({
+      "pcl/#{opts[:release]}/include" => "pcl/include",
+      "pcl/#{opts[:release]}/#{tgt_lib}" => "pcl/#{tgt_lib}"
+  })
+  # pylon5
+  dirs.merge!({
+      "pylon5/include" => "pylon5/include",
+      "pylon5/bin" => "pylon5/bin",
+      "pylon5/lib64" => "pylon5/lib64",
+      "pylon5/share" => "pylon5/share",
+  })
+  # vtk
+  dirs.merge!({
+      "vtk/#{opts[:release]}/include" => "vtk/include",
+      "vtk/#{opts[:release]}/#{tgt_lib}" => "vtk/#{tgt_lib}"
+  })
+  dirs
+end
+
+#----------------------- main -----------------------#
+parse_options(ARGV)
+puts "Original from:          #{@options[:input]}"
+puts "Customize to:           #{@options[:output]}"
+puts "Customize for release:  #{@options[:release]}"
+puts "Customize for target:   #{@options[:target]}"
+puts "-------------------------------------------------"
+
+components.each do |k, v|
+  src = File.join(@options[:input], k)
+  dst = File.join(@options[:output], v)
+  puts "Copy #{src} to #{dst}"
+  FileUtils.mkdir_p(File.dirname(dst))
+  FileUtils.cp_r(src, File.dirname(dst))
+end
