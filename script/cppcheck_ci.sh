@@ -142,4 +142,11 @@ if [ -z $KEEP_XML ]; then
     echo ">>> Temporary XML report was removed."
 fi
 
+if [ -f "$OUTPUT/style.css" ]; then
+    echo "<style>" >> "$OUTPUT/index.html"
+    cat "$OUTPUT/style.css" >> "$OUTPUT/index.html"
+    echo "</style>" >> "$OUTPUT/index.html"
+    echo ">>> Style sheet embeded."
+fi
+
 echo ">>> Finished!"
