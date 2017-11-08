@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+
+#################################################################
+#  Script to softlink a so file with given version              #
+#  Usage:                                                       #
+#  softlinker 1.10 file.so.1.10.11                              #
+#  This generate softlink file.so.1.10 ~> file.so.1.10.11       #
+#################################################################
+
+VERSION = ARGV[0]
+SO_FILE = ARGV[1]
+
+if SO_FILE.nil? || !File.exist?(SO_FILE)
+  puts "ERROR: invalid so file: #{SO_FILE}"
+  exit 1
+end
+
+$matched_so = SO_FILE.match(/(^[A-Za-z][A-Za-z0-9\-]*\.so)(\.\d+)*$/)
+
+if $matched_so.nil?
+  puts "ERROR: so file has invalid extension"
+  exit 1
+end
+
+$so_base = $matched_so[1]
+
+if VERSION.match(/^\d+(\.\d+)*/).nil?
+  puts "ERROR: invalid version string: #{VERSION}"
+  exit 1
+end
+
+$new_link = "#{$so_base}.#{VERSION}"
+
+if not File.exist?($new_link)
+  File.symlink(SO_FILE, $new_link)
+  puts "SOFTLINK: #{new_link} ~> #{SO_FILE}"
+end

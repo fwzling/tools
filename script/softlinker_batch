@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+
+#################################################################
+#  Script to softlink so file(s) with given version             #
+#  Usage:                                                       #
+#  softlinker 1.10 'lib*.so.1.10.11'                            #
+#  This generate softlink libx.so.1.10 ~> libx.so.1.10.11, etc. #
+#################################################################
+
+VERSION = ARGV[0]
+PATTERN = ARGV[1]
+
+if VERSION.nil?
+  puts "ERROR: version string is not specified"
+  exit 1
+end
+
+if VERSION.match(/^\d+(\.\d+)*/).nil?
+  puts "ERROR: invalid version string: #{VERSION}"
+  exit 1
+end
+
+if PATTERN.nil? 
+  puts "ERROR: pattern is not specificed"
+  exit 1
+end
+
+Dir[PATTERN].each do |f|
+  puts "=> Processing #{f} with #{VERSION}"
+  begin
+    $matched_so = f.match(/(^[A-Za-z][A-Za-z0-9\-]*\.so)(\.\d+)*$/)
+    if $matched_so.nil?
+      puts "SKIPED: so file with invalid extension #{f}"
+      next
+    end
+    $new_link = "#{$matched_so[1]}.#{VERSION}"
+    if not File.exist?($new_link)
+      File.symlink(f, $new_link)
+      puts "SOFTLINK: #{$new_link} ~> #{f}"
+    end
+  rescue StandardError => e
+    puts "Exception: #{e.message}"
+    next
+  end
+end
+
