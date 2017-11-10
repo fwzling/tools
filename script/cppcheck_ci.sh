@@ -96,6 +96,7 @@ TMP_XML_OUTPUT="/tmp/cppcheck_results-$TS.xml"
 
 CHECK_COMMAND="cppcheck --enable=performance,portability,missingInclude \
                         -U__AVR -i./src/uos_3rdparty -i./src/uos_depend \
+                        -i./src/vtracker/3rdparty \
                         -I ./src/uos_core/include \
                         -I ./src/uos_cv_framework/include \
                         -I ./src/uos_rcslib/uos_rcs/include \
