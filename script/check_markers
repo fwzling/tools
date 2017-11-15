@@ -24,6 +24,7 @@ else
 end
 
 $markers_stack = []
+$marker_nums = []
 
 lines.each do |line|
   if line.match($push_pattern)
@@ -34,6 +35,7 @@ lines.each do |line|
       exit 1
     end
     $markers_stack << actual
+    $marker_nums << actual.to_i
   elsif line.match($pop_pattern)
     captured = line.match($pop_pattern)
     annonated = captured[1]
@@ -44,3 +46,6 @@ lines.each do |line|
     next
   end
 end
+
+puts "Marker Numbers: #{$marker_nums.uniq.sort}"
+
