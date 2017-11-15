@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+
+#################################################################
+#  Script to check a sequence of NVVP range markers             #
+#  Usage:                                                       #
+#  (1) check_markers file.text                                  #
+#  (2) grep -R _NVTX_ * | check_markers                         #
+#################################################################
+
+INPUT = ARGV[0]
+
+if !INPUT.nil? && !File.exist?(INPUT)
+  puts "ERROR: #{INPUT} does not exist"
+  exit 1
+end
+
+$push_pattern = /PUSH_RANGE\(.*,\s*(\d+)\s*\)\s*;\s*\/\/\s*_NVTX_(\d+)/ 
+$pop_pattern  = /POP_RANGE\s*;\s*\/\/\s*_NVTX_(\d+)/
+
+if INPUT.nil?
+  lines = $stdin.readlines
+else
+  lines = File.readlines(INPUT)
+end
+
+$markers_stack = []
+
+lines.each do |line|
+  if line.match($push_pattern)
+    captured = line.match($push_pattern)
+    actual, annonated = captured[1], captured[2]
+    if not actual.eql?(annonated)
+      puts "ERROR: Actual number does not match annonated number. #{line}"
+      exit 1
+    end
+    $markers_stack << actual
+  elsif line.match($pop_pattern)
+    captured = line.match($pop_pattern)
+    annonated = captured[1]
+    if not annonated.eql?($markers_stack.slice!(-1))
+      puts "ERROR: PUSH_RANGE and POP_RANGE not paried. #{line}"
+    end
+  else
+    next
+  end
+end
