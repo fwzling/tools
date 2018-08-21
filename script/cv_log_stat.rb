@@ -60,7 +60,7 @@ end
 
 puts "Number of records:"
 puts "    Stream[0]: #{fps_stream_0.count}"
-puts "    Stream[1]: #{fps_stream_0.count}"
+puts "    Stream[1]: #{fps_stream_1.count}"
 puts "    Perc_dect: #{perc_detect_time.count}"
 puts "    Wflow_pop: #{perc_deal_latency.count}"
 
@@ -73,6 +73,7 @@ puts "    Wflow_pop: #{perc_deal_latency.count}"
   [perc_detect_time, "Detection.Clocks"],
   [perc_deal_latency, "Detection.Deal.Latency"]
 ].each do | stat, subject |
+    next if stat.empty?
     puts ""
     puts subject 
     puts "  Min:                #{stat.sort.first.round(4)}"
