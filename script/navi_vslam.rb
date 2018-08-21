@@ -151,7 +151,7 @@ DEBUG_PRINT = false                # default off
 MAX_LATENCY_FOR_ERROR_STATE = 1.0  # 1 sec
 MAX_DATA_LOSS_TIME_VSLAM = 0.3     # 300 ms
 RECORD_PREFIX = "navi_log_input_data:"
-FIELDS_NUM = 131
+FIELDS_NUM = 211 
 INDEX_VSLAM_TS_0 = 64
 INDEX_VSLAM_TS_1 = 67
 INDEX_RECORD_TS = 68
@@ -184,6 +184,7 @@ end
 puts "Number of records: [#{recLineNum}, #{vslam0_latency.count}, #{vslam1_latency.count}]"
 
 [ [vslam0_latency, "VSLAM_0 Latency"], [vslam1_latency, "VSLAM_1 Latency"] ].each do | stat, subject |
+    next if stat.empty?
     puts subject 
     puts "  Max:                #{stat.sort.last.round(4)}"
     puts "  P95:                #{stat.percentile(95).round(4)}"
