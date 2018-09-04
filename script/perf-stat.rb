@@ -10,10 +10,6 @@
 #               sudo apt-get install ruby
 #               sudo gem install descriptive_statistics
 
-
-## <uos_cv_framework.log>
-# [20180818 16:04:54.762:INFO:uos_cv_framework] <uos_cv_vslam_wrapper.cc:691 vslam_callback()> cv_worker_0 vslam: X[-77173.6470] Y[4389742.5561] Z[-0.3944] Theta[4.3762] alpha[0.0248] beta[0.0132] Confidence[1.00] Stream[0] ret[0] tstamp[1534579494.762] FPS[12] Clocks[147 ms] Latency[0.152]
-
 require 'descriptive_statistics'
 require 'time'
 
@@ -47,8 +43,8 @@ end
 
 # -------------------- Process Navigation Log ---------------------- #
 ## <uos_navigation.log>
-# [20180823 16:45:25.734:INFO:uos_navigation] <fusion_test_replay.c:338 fusion_test_replay_write()> 
-# navi_log_input_data:1 0 0.250 0.000 0.250 0.250 0.000 0.250 1.000 0.000 0.000 0.000 0.000 0.000 0.021 116.09891717 39.65650978 -77301.059 4390022.706 4.193 4 1 1 1 0 0.000 0.000 0.000 0.000 -77286.159 4390031.419 3.296 0.124 -77301.104 4390022.567 4.196 0.784 0.000 0.000 0.000 0.000 -77300.833 4390022.873 4.193 0.652 0.000 5.900 1 1 1.000 1.000 0.000 0.000 0.000 0.000 0.784 0.784 0.000 0.000 0.532 0.652 1534985125.650 1535013925.689 0.000 1535013916.906 1535013925.663 0.000 1535013925.621 1535013925.735 0 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0 38.051 -1000000.000 -1000000.000 0.000 0.000 0.000 -1.314 0.030 6.251 1.854 0.010 -0.019 0.000 0.000 0.000 -1.783 6.280 0.002 1 -77301.059 4390022.706 4.193 4 0.000 0.000 0.000 0.000 -77285.154 4390031.553 3.252 0.124 -77301.104 4390022.567 4.196 0.784 0.000 0.000 0.000 0.000 -77300.833 4390022.873 4.193 0.652 0 0 0 1 0 1 1.000
+# [20180903 16:10:08.686:INFO:uos_navigation] <fusion_test_replay.c:428 fusion_test_replay_write()> 
+# navi_log_input_data:1 0 0.000 0.000 0.250 0.500 0.000 0.250 0.000 0.000 0.210 0.000 0.000 0.223 0.020 0.00000000 0.00000000 0.000 0.000 0.000 0 0 0 0 0 0.000 0.000 0.000 0.000 2.345 12.786 1.607 0.740 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 2.269 12.804 1.607 0.788 0.900 -1.150 1 1 0.000 0.000 0.000 0.000 0.740 0.740 0.000 0.000 0.000 0.000 0.788 0.788 0.000 0.000 0.000 1535962208.427 0.000 0.000 1535962208.439 1535962208.687 0 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0 0.000 0.000 0.000 0.000 0.000 0.000 -1.475 0.004 6.281 0.000 0.000 0.000 0.000 0.000 0.000 -1.554 6.267 0.003 1 0.000 0.000 0.000 0 0.000 0.000 0.000 0.000 2.354 12.554 1.610 0.740 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 2.278 12.583 1.609 0.788 0 0 0 0 0 0 0.000 2.283 12.819 1.612 1.000 1535962208.238 -1.059 6.261 6.277 0.300 0 1.000 1.000 2.301 12.418 1.617 1.000 2.305 12.825 1.613 1.000 1535962208.442 -1.065 6.275 0.013 0.300 1 1.000 1.000 2.314 12.607 1.616 1.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0 0.000 0.000 0.000 0.000 0.000 0.000
 # Fields:
 #       0 has_valid_loc_data
 #       1 pure_est_by_roadmap_enabled
@@ -187,6 +183,8 @@ NAVI_MAX_LATENCY_FOR_ERROR_STATE = 1.0  # 1 sec
 NAVI_MAX_DATA_LOSS_TIME_VSLAM    = 0.3  # 300 ms
 NAVI_INDEX_VSLAM_TS_0            = 64
 NAVI_INDEX_VSLAM_TS_1            = 67
+NAVI_INDEX_VSLAM_TS_2            = 135 
+NAVI_INDEX_VSLAM_TS_3            = 151 
 NAVI_INDEX_RECORD_TS             = 68
 NAVI_RECORD_LINE_REGEXPR    = /^navi_log_input_data\:([\-\d\.\s]*)/ 
 NAVI_TIMESTAMP_LINE_REGEXPR = /^\[([\d]{8}\s[\d\:\.]+)\:INFO\:uos_navigation\]/
@@ -196,6 +194,8 @@ def procNaviLog(logPath)
     recLineNum = 0
     vslam0_latency = []
     vslam1_latency = []
+    vslam2_latency = []
+    vslam3_latency = []
 
     File.readlines(logPath).each do | line |
         begin
@@ -205,26 +205,32 @@ def procNaviLog(logPath)
                 @naviEndTime = ts
                 foundFirstRecord = true
             elsif matched = line.match(NAVI_RECORD_LINE_REGEXPR)
-                data = matched[1].split(' ')
-                vslam0_ts = data[NAVI_INDEX_VSLAM_TS_0].to_f
-                vslam1_ts = data[NAVI_INDEX_VSLAM_TS_1].to_f
-                rec_ts    = data[NAVI_INDEX_RECORD_TS].to_f
-                la_0 = rec_ts - vslam0_ts
-                la_1 = rec_ts - vslam1_ts
-                puts "Processing record: [#{la_0}] [#{la_1}]" if DEBUG_Print
                 recLineNum += 1
-                vslam0_latency << la_0 if la_0 < NAVI_MAX_LATENCY_FOR_ERROR_STATE 
-                vslam1_latency << la_1 if la_1 < NAVI_MAX_LATENCY_FOR_ERROR_STATE 
+                data = matched[1].split(' ')
+                ts_rec = data[NAVI_INDEX_RECORD_TS].to_f
+                [ [NAVI_INDEX_VSLAM_TS_0, vslam0_latency], [NAVI_INDEX_VSLAM_TS_1, vslam1_latency],
+                  [NAVI_INDEX_VSLAM_TS_2, vslam2_latency], [NAVI_INDEX_VSLAM_TS_3, vslam3_latency] ].each do | idx, measurement |
+                    ts_vslam = data[idx].to_f
+                    next if ts_vslam.zero?
+                    latency = ts_rec - ts_vslam
+                    measurement << latency if latency < NAVI_MAX_LATENCY_FOR_ERROR_STATE
+                    puts "Processing record #{recLineNum}: Field[#{idx}] = #{latency}" if DEBUG_Print
+                end
             end
         rescue Exception => e
             puts e.message
             next
         end 
     end
-    puts "Number of records: [#{recLineNum}, #{vslam0_latency.count}, #{vslam1_latency.count}]"
-    puts "Time range: [#{@naviStartTime}, #{@naviEndTime}]"
-    [ ["VSLAM_0 Latency", vslam0_latency],
-      ["VSLAM_1 Latency", vslam1_latency] ].each do | subject, stat |
+    puts "Number of Records: #{recLineNum}"
+    puts "  VSLAM_0          : #{vslam0_latency.count}"
+    puts "  VSLAM_1          : #{vslam1_latency.count}"
+    puts "  VSLAM_2          : #{vslam2_latency.count}"
+    puts "  VSLAM_3          : #{vslam3_latency.count}"
+    puts "  Timestamp Range  : #{@naviStartTime}, #{@naviEndTime}"
+
+    [ ["VSLAM_0 Latency", vslam0_latency], ["VSLAM_1 Latency", vslam1_latency],
+      ["VSLAM_2 Latency", vslam2_latency], ["VSLAM_3 Latency", vslam3_latency] ].each do | subject, stat |
         next if stat.empty?
         puts subject 
         puts "  Max:                #{stat.sort.last.round(3)}"
@@ -242,11 +248,14 @@ end
 # [20180818 16:04:54.762:INFO:uos_cv_framework] <uos_cv_vslam_wrapper.cc:691 vslam_callback()> cv_worker_0 vslam: X[-77173.6470] Y[4389742.5561] Z[-0.3944] Theta[4.3762] alpha[0.0248] beta[0.0132] Confidence[1.00] Stream[0] ret[0] tstamp[1534579494.762] FPS[12] Clocks[147 ms] Latency[0.152]
 
 CV_VSLAM_LINE_REGEXPR = /^\[(\d{8}\s[\d\:\.]+)\:INFO\:uos_cv_framework\].*Stream\[(\d)\].*FPS\[(\d+)\].*Clocks\[(\d+)\sms\].*Latency\[([\d\.]+)\]$/
+CV_NUM_VSLAM_STREAMS = 4
 
 def procCvFrameworkLog(logPath)
-    fpsStream_0,     fpsStream_1     = [], []
-    clockStream_0,   clockStream_1   = [], []
-    latencyStream_0, latencyStream_1 = [], []
+    measurements = [ { :fps => [], :clock => [], :latency => [] },
+                     { :fps => [], :clock => [], :latency => [] },
+                     { :fps => [], :clock => [], :latency => [] },
+                     { :fps => [], :clock => [], :latency => [] } ]
+    exit 1 if measurements.count != CV_NUM_VSLAM_STREAMS
 
     File.readlines(logPath).each do | line |
         begin
@@ -257,19 +266,11 @@ def procCvFrameworkLog(logPath)
                 fps       = matched[3].to_i
                 clock     = matched[4].to_i
                 latency   = matched[5].to_f
+                puts "[ERROR] Stream ID exceeds the supported max value" and exit 1 if stream_id >= CV_NUM_VSLAM_STREAMS
                 puts "[#{timestamp}] Stream[#{stream_id}] FPS[#{fps}] Clock[#{clock}] Latency[#{latency}]" if DEBUG_Print
-                if stream_id == 0
-                    fpsStream_0 << fps
-                    clockStream_0 << clock
-                    latencyStream_0 << latency
-                elsif stream_id == 1
-                    fpsStream_1 << fps
-                    clockStream_1 << clock
-                    latencyStream_1 << latency
-                else
-                    puts "[ERROR] unexpected stream number"
-                    exit 1
-                end
+                measurements[stream_id][:fps] << fps
+                measurements[stream_id][:clock] << clock 
+                measurements[stream_id][:latency] << latency
             end
         rescue Exception => e
             puts e.message
@@ -277,25 +278,24 @@ def procCvFrameworkLog(logPath)
         end
     end
     puts "Number of records:"
-    puts "    Stream[0]: #{fpsStream_0.count}"
-    puts "    Stream[1]: #{fpsStream_1.count}"
+    measurements.each_with_index  do | measurement, index |
+        puts "    Stream[#{index}]: #{measurement[:fps].count}"
+    end
+    puts ""
 
-    [ [fpsStream_0, "Stream[0].FPS"],
-      [clockStream_0, "Stream[0].Clock"],
-      [latencyStream_0, "Stream[0].Latency"],
-      [fpsStream_1, "Stream[1].FPS"],
-      [clockStream_1, "Stream[1].Clock"],
-      [latencyStream_1, "Stream[1].Latency"],
-    ].each do | stat, subject |
-        next if stat.empty?
+    measurements.each_with_index do | measurement, index |
+        puts "--- Stream_#{index} ---"
+        measurement.each_pair do | subject, stat |
+            next if stat.empty?
+            puts subject.to_s.capitalize
+            puts "  Min:                #{stat.sort.first.round(3)}"
+            puts "  Max:                #{stat.sort.last.round(3)}"
+            puts "  P10:                #{stat.percentile(10).round(3)}"
+            puts "  P90:                #{stat.percentile(90).round(3)}"
+            puts "  Average:            #{stat.mean.round(3)}"
+            puts "  StdDev:             #{stat.standard_deviation.round(3)}"
+        end
         puts ""
-        puts subject 
-        puts "  Min:                #{stat.sort.first.round(3)}"
-        puts "  Max:                #{stat.sort.last.round(3)}"
-        puts "  P10:                #{stat.percentile(10).round(3)}"
-        puts "  P90:                #{stat.percentile(90).round(3)}"
-        puts "  Average:            #{stat.mean.round(3)}"
-        puts "  StdDev:             #{stat.standard_deviation.round(3)}"
     end
 end
 
