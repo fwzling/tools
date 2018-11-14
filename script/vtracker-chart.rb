@@ -8,7 +8,6 @@
 #
 ## Dependency:
 #               sudo apt-get install ruby
-#               sudo gem install descriptive_statistics
 #               sudo gem install gruff 
 
 require 'gruff'
