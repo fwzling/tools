@@ -175,6 +175,8 @@ end
 @options = parse_options(ARGV)
 @logFile = ARGV[0]
 
+exit 1 if @logFile.nil?
+
 if not File.exist?(@logFile)
     puts "ERROR: #{@logFile} not found"
     exit 1
