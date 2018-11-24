@@ -161,7 +161,7 @@ puts "   Draw at most #{@options.max_num} records"
     @max_num = metrics.last.count
 end
 @chart.labels = { 0 => Time.at(@record_stream[@options.start][:ts_val]).to_s,
-                  [@max_num-1, 0].max => Time.at(@record_stream[@options.start + @max_num][:ts_val]).to_s }
+                  [@max_num-1, 0].max => Time.at(@record_stream[[@options.start + @max_num, @record_stream.count-1].min][:ts_val]).to_s }
 
 @chart.write "#{@logFile}.png"
 
