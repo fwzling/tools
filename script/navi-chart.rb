@@ -3,7 +3,7 @@
 ## Description: Script to parse uos_navigation log, and
 #               visualize vslam latency in charts.
 #
-## Usage:       ruby navi-chart.rb [options] /file/of/vtracker/log
+## Usage:       ruby navi-chart.rb [options] /file/of/navigation/log
 #
 ## Dependency:
 #               sudo apt-get install ruby

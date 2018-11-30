@@ -16,8 +16,10 @@ require 'time'
 DEBUG_Print = false  # default off
 
 NAVIGATION_Log   = "uos_navigation.log"
+MASTER_Tegra_Log = "tegra_stats.log"
 CV_FRAMEWORK_Log = "slave_uos/uos_cv_framework.log"
 SLAVE_Tegra_Log  = "slave_uos/tegra_stats.log"
+CV_PERC_Log      = "slave_uos/uos_cv_perception.log"
 
 # ----------------- Check Command Line Arguments ------------------- #
 logPath = ARGV[0]
@@ -29,10 +31,12 @@ if not Dir.exist?(logPath)
 end
 
 navigationLogPath  = File.join(logPath, NAVIGATION_Log)
+masterTegraLogPath = File.join(logPath, MASTER_Tegra_Log)
 cvFrameworkLogPath = File.join(logPath, CV_FRAMEWORK_Log)
 slaveTegraLogPath  = File.join(logPath, SLAVE_Tegra_Log)
+cvPercLogPath      = File.join(logPath, CV_PERC_Log)
 
-[navigationLogPath, cvFrameworkLogPath, slaveTegraLogPath].each do | fpath |
+[navigationLogPath, masterTegraLogPath, cvFrameworkLogPath, slaveTegraLogPath].each do | fpath |
     if not File.exist?(fpath)
         puts "ERROR: #{fpath} not found"
         exit 1
@@ -237,7 +241,7 @@ def procNaviLog(logPath)
         puts "  P95:                #{stat.percentile(95).round(3)}"
         puts "  P90:                #{stat.percentile(90).round(3)}"
         puts "  Average:            #{stat.mean.round(3)}"
-        puts "  StandardDeviation:  #{stat.standard_deviation.round(3)}"
+        puts "  StdDev:             #{stat.standard_deviation.round(3)}"
         puts "  %[<#{NAVI_MAX_DATA_LOSS_TIME_VSLAM}]:            #{stat.percentile_rank(NAVI_MAX_DATA_LOSS_TIME_VSLAM).round(3)}"
         puts "  Range:              #{stat.range.round(3)}"
     end
@@ -299,13 +303,13 @@ def procCvFrameworkLog(logPath)
     end
 end
 
-# -------------------- Process Slave Tegra Log --------------------- #
+# -------------------- Process Tegra Log --------------------- #
 ## <tegra_stats.log>
 # [2018-08-23 16:30:36] : RAM 4923/7850MB (lfb 360x4MB) CPU [33%@2034,42%@2033,100%@2036,22%@2035,61%@2034,43%@2035] EMC_FREQ 14%@1600 GR3D_FREQ 22%@1300 APE 150 MTS fg 0% bg 0% BCPU@53C MCPU@53C GPU@59C PLL@53C AO@50.5C Tboard@48C Tdiode@49.5C PMIC@100C thermal@52.1C VDD_IN 9273/9056 VDD_CPU 3716/3302 VDD_GPU 1430/1586 VDD_SOC 714/705 VDD_WIFI 0/0 VDD_DDR 1148/1198
 
 TEGRA_RECORD_LINE_REGEXPR = /^\[([\d\s:-]*).*CPU\s\[(\d*)\%@\d+,(\d*)\%@\d+,(\d*)\%@\d+,(\d*)\%@\d+,(\d*)\%@\d+,(\d*)\%@\d+\].*GR3D_FREQ\s(\d+)/
 
-def procSlaveTegraLog(logPath)
+def procTegraLog(logPath)
     usageCPUAll = []
     usageGPUAll = []
     File.readlines(logPath).each do | line |
@@ -344,16 +348,75 @@ def procSlaveTegraLog(logPath)
     end
 end
 
+
+# -------------------- Process CV Perception Log --------------------- #
+## <uos_cv_perception.log>
+# [20180824 12:18:57.642:INFO:uos_cv_perception] <uos_cv_vogm.cpp:193 get_visual_ogm()> seg time: 0.0512, ipm2vogm: 0.0050, display: 0.0000
+
+CV_PERC_VOGM_REGEXPR = /^\[(\d{8}\s[\d\:\.]+)\:INFO.*seg\stime\:\s([\d\.]+).+ipm2vogm\:\s([\d\.]+).+display\:\s([\d\.]+)/
+
+def procCvPercLog(logPath)
+    tsCounter    = Hash.new(0)
+    segTime      = []
+    ipm2vogmTime = []
+    displayTime  = []
+    File.readlines(logPath).each do | line |
+        begin
+            if matched = line.match(CV_PERC_VOGM_REGEXPR)
+                timestamp  = Time.parse(matched[1])
+                next unless timestamp.between?(@naviStartTime, @naviEndTime)
+                seg_time      = matched[2].to_f
+                ipm2vogm_time = matched[3].to_f
+                display_time  = matched[4].to_f
+                puts "[#{timestamp}] #{seg_time} #{ipm2vogm_time} #{display_time}" if DEBUG_Print
+                segTime      << seg_time
+                ipm2vogmTime << ipm2vogm_time
+                displayTime  << display_time
+                tsCounter[timestamp.to_s] += 1
+            end
+        rescue Exception => e
+            puts e.message
+            next
+        end
+    end
+
+    puts "No vogm records found" and return if segTime.empty?
+    puts "Analyzed #{segTime.count} vogm perception recrods"
+    [ ["VOGM-FPS", tsCounter.values],
+      ["VOGM-Seg", segTime],
+      ["VOGM-Ipm", ipm2vogmTime],
+      ["VOGM-Vis", displayTime] ].each do | subject, stat |
+        next if stat.empty?
+        puts subject 
+        puts "  Max:                #{stat.sort.last.round(3)}"
+        puts "  P95:                #{stat.percentile(95).round(3)}"
+        puts "  P90:                #{stat.percentile(90).round(3)}"
+        puts "  Average:            #{stat.mean.round(3)}"
+        puts "  StdDev:             #{stat.standard_deviation.round(3)}"
+    end
+end
+
 # -------------------- main --------------------- #
 
 puts " ---------------- Process navigation log ---------------- "
 procNaviLog(navigationLogPath)
 puts " * "
 
-puts " ---------------- Process tegra log ---------------- "
-procSlaveTegraLog(slaveTegraLogPath)
+puts " ---------------- Process master tegra log ---------------- "
+procTegraLog(masterTegraLogPath)
+puts " * "
+
+puts " ---------------- Process slave tegra log ---------------- "
+procTegraLog(slaveTegraLogPath)
 puts " * "
 
 puts " ---------------- Process cv_framework log ---------------- "
 procCvFrameworkLog(cvFrameworkLogPath)
+puts " * "
+
+if File.exist?(cvPercLogPath)
+    puts " ---------------- Process cv_perception log ---------------- "
+    procCvPercLog(cvPercLogPath)
+end
+
 puts " * "
