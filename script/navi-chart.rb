@@ -6,7 +6,10 @@
 ## Usage:       ruby navi-chart.rb [options] /file/of/navigation/log
 #
 ## Dependency:
-#               sudo apt-get install ruby
+#               sudo apt-get install ruby  (recommend ruby2.3 and above)
+#               sudo apt-get install ruby2.3-dev
+#               sudo apt-get install libmagickcore-dev
+#               sudo apt-get install ruby-rmagick
 #               sudo gem install gruff
 #               sudo gem install descriptive_statistics
 
