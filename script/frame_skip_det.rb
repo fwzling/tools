@@ -58,8 +58,8 @@ end
 @imgFiles.each do | fn |
     if matched = fn.match(/(\d+)\.\d+_(\d+)\.tiff/)
         seq = matched[2].to_i
-        if seq - @seqMarker + @options.dump_interval > @options.max_skip
-            puts "Detected #{seq - @seqMarker + @options.dump_interval} frames skipped at #{fn}"
+        if seq - @seqMarker - @options.dump_interval > @options.max_skip
+            puts "Detected #{seq - @seqMarker - @options.dump_interval} frames skipped at #{fn}"
         end
         @seqMarker = seq
     end
