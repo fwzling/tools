@@ -1,8 +1,11 @@
 #!/usr/bin/env ruby
 
-## Description: Script to detect frame skip in dumped images under N frames threshold 
+## Description: Script to detect frame skip in dumped images with N-skipped-frames threshold 
 #
-## Usage:       ruby frame_skip_det.rb [options] /path/to/dump_images/image/image_capturer_2
+## Usage:       ruby frame_skip_det.rb [options] /path/to/dump_images/image/image_capturer_X
+#
+## Dependency:
+#               sudo apt-get install ruby  (recommend ruby2.3 and above)
 
 require 'time'
 require 'optparse'
@@ -17,7 +20,7 @@ def parse_options(args)
     options.dump_interval = 1
 
     opt_parser = OptionParser.new do | opts |
-        opts.banner = "Usage:  frame_skip_det.rb  [options]  /path/to/dump_images/image/image_capturer_2"
+        opts.banner = "Usage:  frame_skip_det.rb  [options]  /path/to/dump_images/image/image_capturer_X"
         opts.separator ""
         opts.separator "Specific options:"
 
