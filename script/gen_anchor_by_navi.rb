@@ -82,7 +82,7 @@ if not File.exist?(@options.navilog)
 end
 
 if not File.exist?(@options.imgdir)
-    puts "ERROR: #{@options.navilog} not found"
+    puts "ERROR: #{@options.imgdir} not found"
     exit 1
 end
 
@@ -119,7 +119,7 @@ open('cube_gps.txt', 'w') do | f |
                 puts selected
             end
         end
-        if not (selected.nil? || (selected[:ts].to_f - t.to_f).abs > 0.3 || selected[:conf].to_f < 0.5)
+        if not (selected.nil? || (selected[:ts].to_f - t.to_f).abs > 0.2 || selected[:conf].to_f < 0.5)
             yaw = 3.1415926 / 2.0 - selected[:theta].to_f
             anchor_line = "#{t} #{selected[:east]} #{selected[:north]} #{selected[:height]} #{yaw.round(3)} 0.0 0.0 1.0"
         else
