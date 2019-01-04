@@ -149,7 +149,7 @@ end
 
 puts " ---------------------- Processing vtracker_test log --------------------------- "
 @pose_dict_1 = parse_and_generate_dict(@options.log1)
-@pose_dict_2 = parse_and_generate_dict(@options.log2) if not @options.log2.empty?
+@pose_dict_2 = @options.log2.empty? ? {} : parse_and_generate_dict(@options.log2)
 
 puts " ---------------------- Processing image directory --------------------------- "
 @image_list = Dir[@options.imgdir + "/*." + FileExt].sort

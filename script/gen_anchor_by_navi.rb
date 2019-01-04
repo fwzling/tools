@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 ## Description: Script to parse uos_navigation log, and
-#               generate a pose list in time order for VSLAM mapping 
+#               generate a pose list in time order for VSLAM mapping
 #
 ## Usage:       ruby gen_anchor_by_navi.rb [options] --navilog /path/to/navi/log --imgdir /path/to/img/dir
 #
@@ -26,13 +26,13 @@ def parse_options(args)
         opts.banner = "Usage:  gen_anchor_by_navi.rb  [options]  --navilog uos_navigation.log --imgdir image_capturer_X"
         opts.separator ""
         opts.separator "Specific options:"
-        
+
 	opts.on("--navilog f", String, "Path to uos_navigation") do | f |
             options.navilog = f
         end
-        
+
 	opts.on("--imgdir d", String, "Dumpped image directory") do | d |
-            options.imgdir = d 
+            options.imgdir = d
         end
 
         opts.on("--verbose", "Output trivial information") do
@@ -52,13 +52,13 @@ def parse_tokenize(log_file)
         begin
             if matched = line.match(RECORD_LINE_REGEXPR)
                 record_stream << { :east   => matched[1],
-                                   :north  => matched[2], 
-                                   :height => matched[3], 
-                                   :alpha  => matched[4], 
-                                   :beta   => matched[5], 
-                                   :theta  => matched[6], 
-                                   :state  => matched[7], 
-                                   :conf   => matched[8], 
+                                   :north  => matched[2],
+                                   :height => matched[3],
+                                   :alpha  => matched[4],
+                                   :beta   => matched[5],
+                                   :theta  => matched[6],
+                                   :state  => matched[7],
+                                   :conf   => matched[8],
                                    :ts     => matched[9] }
             end
         rescue Exception => e
@@ -82,7 +82,7 @@ if not File.exist?(@options.navilog)
 end
 
 if not File.exist?(@options.imgdir)
-    puts "ERROR: #{@options.imgdir} not found"
+    puts "ERROR: #{@options.navilog} not found"
     exit 1
 end
 
@@ -119,7 +119,7 @@ open('cube_gps.txt', 'w') do | f |
                 puts selected
             end
         end
-        if not (selected.nil? || (selected[:ts].to_f - t.to_f).abs > 0.2 || selected[:conf].to_f < 0.5)
+        if not (selected.nil? || (selected[:ts].to_f - t.to_f).abs > 0.3 || selected[:conf].to_f < 0.5)
             yaw = 3.1415926 / 2.0 - selected[:theta].to_f
             anchor_line = "#{t} #{selected[:east]} #{selected[:north]} #{selected[:height]} #{yaw.round(3)} 0.0 0.0 1.0"
         else
