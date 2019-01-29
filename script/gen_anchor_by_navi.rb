@@ -13,6 +13,16 @@ require 'ostruct'
 require 'time'
 
 RECORD_LINE_REGEXPR = /^navi_log_output_data\:([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)/
+RAW_RECORD_LINE_REGEXPR     = /^navi_log_input_data\:([\-\d\.\s]*)/ 
+RAW_RECORD_INDEX_TS         = 68
+RAW_RECORD_INDEX_GPS_EAST   = 17 
+RAW_RECORD_INDEX_GPS_NORTH  = 18
+RAW_RECORD_INDEX_GPS_HEIGHT = 81
+RAW_RECORD_INDEX_GPS_THETA  = 19
+RAW_RECORD_INDEX_GPS_STATE  = 20
+RAW_RECORD_INDEX_GPS_CONF   = 130
+RAW_RECORD_INDEX_GPS_ALPHA  = 82
+RAW_RECORD_INDEX_GPS_BETA   = 83
 
 # --- Define Command Line Options --- #
 
@@ -20,6 +30,7 @@ def parse_options(args)
     options = OpenStruct.new
     options.navilog = "uos_navigation.log"
     options.imgdir  = "image_capturer_X"
+    options.gps     = false
     options.verbose = false
 
     opt_parser = OptionParser.new do | opts |
@@ -27,12 +38,16 @@ def parse_options(args)
         opts.separator ""
         opts.separator "Specific options:"
 
-	opts.on("--navilog f", String, "Path to uos_navigation") do | f |
+	    opts.on("--navilog f", String, "Path to uos_navigation") do | f |
             options.navilog = f
         end
 
-	opts.on("--imgdir d", String, "Dumpped image directory") do | d |
+	    opts.on("--imgdir d", String, "Dumpped image directory") do | d |
             options.imgdir = d
+        end
+
+        opts.on("--gps", "Use gps raw input") do
+            options.gps = true
         end
 
         opts.on("--verbose", "Output trivial information") do
@@ -45,6 +60,29 @@ def parse_options(args)
 end
 
 # --- Parse and tokenize time measurement records --- #
+def parse_tokenize_raw(log_file)
+    record_stream = []
+    File.readlines(log_file).each do | line |
+        begin
+            if matched = line.match(RAW_RECORD_LINE_REGEXPR)
+                data = matched[1].split(' ')
+                record_stream << { :east   => data[RAW_RECORD_INDEX_GPS_EAST],
+                                   :north  => data[RAW_RECORD_INDEX_GPS_NORTH],
+                                   :height => data[RAW_RECORD_INDEX_GPS_HEIGHT],
+                                   :alpha  => data[RAW_RECORD_INDEX_GPS_ALPHA],
+                                   :beta   => data[RAW_RECORD_INDEX_GPS_BETA],
+                                   :theta  => data[RAW_RECORD_INDEX_GPS_THETA],
+                                   :state  => data[RAW_RECORD_INDEX_GPS_STATE],
+                                   :conf   => data[RAW_RECORD_INDEX_GPS_CONF],
+                                   :ts     => data[RAW_RECORD_INDEX_TS] }
+            end
+        rescue Exception => e
+            puts e.message
+            next
+        end 
+    end
+    record_stream
+end
 
 def parse_tokenize(log_file)
     record_stream = []
@@ -87,7 +125,11 @@ if not File.exist?(@options.imgdir)
 end
 
 puts " ---------------------- Processing navigation log --------------------------- "
-@record_stream = parse_tokenize(@options.navilog)
+if @options.gps
+    @record_stream = parse_tokenize_raw(@options.navilog)
+else
+    @record_stream = parse_tokenize(@options.navilog)
+end
 puts "   Collected #{@record_stream.count} navigation records"
 @record_dict = {}
 @record_stream.each do | rec |
