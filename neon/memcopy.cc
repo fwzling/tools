@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <random>
 #include <cassert>
+#include <chrono>
 
 #ifdef __aarch64__
 #include <arm_neon.h>
@@ -82,9 +83,32 @@ void* memcpy_bulk_data(void* dest, const void* src, std::size_t count)
 #endif
 }
 
+/*****************************************
+  Test
+ *****************************************/
+
+class Timer
+{
+public:
+    using Clock = std::chrono::high_resolution_clock;
+    using Timepoint = std::chrono::time_point<Clock>;
+    Timepoint start = Clock::now();
+    void reset() { start = Clock::now(); }
+    void report(const char *msg)
+    {
+        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(
+                                 Clock::now() - start);
+        std::cout << "Time for " << msg << ": " << elapsed.count() / 1000.
+            << "ms" << std::endl;
+        reset();
+    }
+};
+
+
+
 int main(int argc, char** argv)
 {
-    if (argc != 2)
+    if (argc < 2)
     {
         std::cerr << "Usage:  test_memcpy 856" << std::endl;
         exit (1);
@@ -94,6 +118,20 @@ int main(int argc, char** argv)
     if (count < 0)
     {
         std::cerr << "Bad argument: " << count << std::endl;
+    }
+
+    int use_bulk_copy = 1;
+    if (argc >= 3)
+    {
+        use_bulk_copy = atoi(argv[2]);
+        if (use_bulk_copy == 1)
+        {
+            std::cout << "Use neon memcopy" << std::endl;
+        }
+        else
+        {
+            std::cout << "Use ordinary memcpy" << std::endl;
+        }
     }
 
     char * src = new char[count];
@@ -106,7 +144,16 @@ int main(int argc, char** argv)
         src[i] = static_cast<char>(dist(rd));
     }
 
-    memcpy_bulk_data(dst, src, count);
+    Timer t;
+    if (use_bulk_copy == 1)
+    {
+        memcpy_bulk_data(dst, src, count);
+    }
+    else
+    {
+        memcpy(dst, src, count);
+    }
+    t.report("memcopy");
 
     int miss = 0;
     for (int i = 0; i < count; i++)
