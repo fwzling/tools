@@ -13,16 +13,34 @@ require 'ostruct'
 require 'time'
 
 RECORD_LINE_REGEXPR = /^navi_log_output_data\:([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)/
-RAW_RECORD_LINE_REGEXPR     = /^navi_log_input_data\:([\-\d\.\s]*)/ 
-RAW_RECORD_INDEX_TS         = 68
-RAW_RECORD_INDEX_GPS_EAST   = 17 
-RAW_RECORD_INDEX_GPS_NORTH  = 18
-RAW_RECORD_INDEX_GPS_HEIGHT = 81
-RAW_RECORD_INDEX_GPS_THETA  = 19
-RAW_RECORD_INDEX_GPS_STATE  = 20
-RAW_RECORD_INDEX_GPS_CONF   = 130
-RAW_RECORD_INDEX_GPS_ALPHA  = 82
-RAW_RECORD_INDEX_GPS_BETA   = 83
+RAW_RECORD_LINE_REGEXPR = /^navi_log_input_data\:([\-\d\.\s[a-z]_]*)/
+LOG_VERSION_REGEXPR = /log version\:\s+([\d\.]+)/
+
+# --- Return GPS raw data index --- #
+def get_gps_index(log_ver, field_name)
+    case field_name
+    when "GPS_TS"
+        (log_ver.to_f < 0.2) ? 68 : 7
+    when "GPS_EAST"
+        (log_ver.to_f < 0.2) ? 17 : 22
+    when "GPS_NORTH"
+        (log_ver.to_f < 0.2) ? 18 : 23
+    when "GPS_HEIGT"
+        (log_ver.to_f < 0.2) ? 81 : 25
+    when "GPS_THETA"
+        (log_ver.to_f < 0.2) ? 19 : 24
+    when "GPS_STATE"
+        (log_ver.to_f < 0.2) ? 20 : 37
+    when "GPS_CONF"
+        (log_ver.to_f < 0.2) ? 130 : 28
+    when "GPS_ALPHA"
+        (log_ver.to_f < 0.2) ? 82 : 26
+    when "GPS_BETA"
+        (log_ver.to_f < 0.2) ? 83 : 27
+    else
+        -1
+    end
+end
 
 # --- Define Command Line Options --- #
 
@@ -62,24 +80,27 @@ end
 # --- Parse and tokenize time measurement records --- #
 def parse_tokenize_raw(log_file)
     record_stream = []
+    log_ver = "0.1"
     File.readlines(log_file).each do | line |
         begin
             if matched = line.match(RAW_RECORD_LINE_REGEXPR)
                 data = matched[1].split(' ')
-                record_stream << { :east   => data[RAW_RECORD_INDEX_GPS_EAST],
-                                   :north  => data[RAW_RECORD_INDEX_GPS_NORTH],
-                                   :height => data[RAW_RECORD_INDEX_GPS_HEIGHT],
-                                   :alpha  => data[RAW_RECORD_INDEX_GPS_ALPHA],
-                                   :beta   => data[RAW_RECORD_INDEX_GPS_BETA],
-                                   :theta  => data[RAW_RECORD_INDEX_GPS_THETA],
-                                   :state  => data[RAW_RECORD_INDEX_GPS_STATE],
-                                   :conf   => data[RAW_RECORD_INDEX_GPS_CONF],
-                                   :ts     => data[RAW_RECORD_INDEX_TS] }
+                record_stream << { :east   => data[get_gps_index(log_ver, "GPS_EAST")],
+                                   :north  => data[get_gps_index(log_ver, "GPS_NORTH")],
+                                   :height => data[get_gps_index(log_ver, "GPS_HEIGHT")],
+                                   :alpha  => data[get_gps_index(log_ver, "GPS_ALPHA")],
+                                   :beta   => data[get_gps_index(log_ver, "GPS_BETA")],
+                                   :theta  => data[get_gps_index(log_ver, "GPS_THETA")],
+                                   :state  => data[get_gps_index(log_ver, "GPS_STATE")],
+                                   :conf   => data[get_gps_index(log_ver, "GPS_CONF")],
+                                   :ts     => data[get_gps_index(log_ver, "GPS_TS")] }
+            elsif matched = line.match(LOG_VERSION_REGEXPR)
+                log_ver = matched[1]
             end
         rescue Exception => e
             puts e.message
             next
-        end 
+        end
     end
     record_stream
 end
