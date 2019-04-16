@@ -141,7 +141,7 @@ if not File.exist?(@options.navilog)
 end
 
 if not File.exist?(@options.imgdir)
-    puts "ERROR: #{@options.navilog} not found"
+    puts "ERROR: #{@options.imgdir} not found"
     exit 1
 end
 
