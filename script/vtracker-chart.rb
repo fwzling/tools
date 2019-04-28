@@ -39,7 +39,7 @@ def parse_options(args)
     options.start = 10
     options.max_num = 1000
     options.size = 800
-    options.min_y = 100
+    options.max_y = 200
 
     opt_parser = OptionParser.new do | opts |
         opts.banner = "Usage:  vtracker-chart.rb  [options]  vtracker.log"
@@ -58,8 +58,8 @@ def parse_options(args)
             options.size = s
         end
 
-        opts.on("--min_y Y", Integer, "Minimal height in Y axis") do | y |
-            options.min_y = y
+        opts.on("--max_y Y", Integer, "Max value showed in Y axis") do | y |
+            options.max_y = y
         end
 
         opts.on("--verbose", "Output trivial information") do
@@ -161,9 +161,17 @@ def process_group(group)
     misc = (last_ts - first_ts) * 1000 - load_image - track_motion - update_localmap - search_mappoints - localmap_pose_opt - relocate - load_mapchunk
     misc = [misc.to_i, 0].max
 
-    compensation = @options.min_y - load_image - track_motion - update_localmap - search_mappoints - localmap_pose_opt - relocate - load_mapchunk - misc
-
     puts "[#{@group_count}]: #{state[:label]}, #{load_image}, #{track_motion}, #{update_localmap}, #{search_mappoints}, #{localmap_pose_opt}, #{relocate}, #{load_mapchunk}, #{misc}" if @options.verbose
+
+    y_reminder = @options.max_y
+    [:load_image, :track_motion, :update_localmap, :search_mappoints, :localmap_pose_opt, :relocate, :load_mapchunk, :misc].each do | var |
+        if binding.local_variable_get(var) <= y_reminder
+            y_reminder -= binding.local_variable_get(var)
+        else
+            binding.local_variable_set(var, y_reminder)
+            y_reminder = 0
+        end
+    end
 
     @labels.merge!({ @group_count => if state[:label].eql? "ok" then 'V' else 'X' end })
     @datasets[0].last << load_image
@@ -174,7 +182,7 @@ def process_group(group)
     @datasets[5].last << relocate
     @datasets[6].last << load_mapchunk
     @datasets[7].last << misc
-    @datasets[8].last << [compensation, 0].max
+    @datasets[8].last << y_reminder 
     @group_count += 1
 end
 
