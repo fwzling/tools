@@ -39,6 +39,7 @@ def parse_options(args)
     options.start = 10
     options.max_num = 1000
     options.size = 800
+    options.min_y = 100
 
     opt_parser = OptionParser.new do | opts |
         opts.banner = "Usage:  vtracker-chart.rb  [options]  vtracker.log"
@@ -55,6 +56,10 @@ def parse_options(args)
 
         opts.on("--size S", Integer, "Chart geometry size in width") do | s |
             options.size = s
+        end
+
+        opts.on("--min_y Y", Integer, "Minimal height in Y axis") do | y |
+            options.min_y = y
         end
 
         opts.on("--verbose", "Output trivial information") do
@@ -156,6 +161,8 @@ def process_group(group)
     misc = (last_ts - first_ts) * 1000 - load_image - track_motion - update_localmap - search_mappoints - localmap_pose_opt - relocate - load_mapchunk
     misc = [misc.to_i, 0].max
 
+    compensation = @options.min_y - load_image - track_motion - update_localmap - search_mappoints - localmap_pose_opt - relocate - load_mapchunk - misc
+
     puts "[#{@group_count}]: #{state[:label]}, #{load_image}, #{track_motion}, #{update_localmap}, #{search_mappoints}, #{localmap_pose_opt}, #{relocate}, #{load_mapchunk}, #{misc}" if @options.verbose
 
     @labels.merge!({ @group_count => if state[:label].eql? "ok" then 'V' else 'X' end })
@@ -167,6 +174,7 @@ def process_group(group)
     @datasets[5].last << relocate
     @datasets[6].last << load_mapchunk
     @datasets[7].last << misc
+    @datasets[8].last << [compensation, 0].max
     @group_count += 1
 end
 
@@ -193,6 +201,7 @@ puts " ---------------------- Processing vtracker log --------------------------
     [:relocate, []],
     [:load_mapchunk, []],
     [:misc, []],
+    [:hiden, []],
 ]
 @labels = { }
 @group_count = 0
@@ -214,7 +223,7 @@ puts "   Draw at most #{@options.max_num} activations"
 @chart.legend_font_size = 12
 @chart.marker_font_size = 12
 @chart.replace_colors(['#FDD84E', '#6886B4', '#72AE6E', '#D1695E', '#8A6EAF', '#EFAA43',
-                       '#FFE4E1', '#00FF00', 'white',])
+                       '#FFE4E1', '#00FF00', 'black',])
 label_pos = 0
 (@options.start..[@group_count, @options.start + @options.max_num].min).each do | i |
     @chart.labels.merge!({ label_pos => @labels[i] })
