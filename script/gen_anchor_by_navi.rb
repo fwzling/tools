@@ -25,7 +25,7 @@ def get_gps_index(log_ver, field_name)
         (log_ver.to_f < 0.2) ? 17 : 22
     when "GPS_NORTH"
         (log_ver.to_f < 0.2) ? 18 : 23
-    when "GPS_HEIGT"
+    when "GPS_HEIGHT"
         (log_ver.to_f < 0.2) ? 81 : 25
     when "GPS_THETA"
         (log_ver.to_f < 0.2) ? 19 : 24
