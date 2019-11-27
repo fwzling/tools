@@ -2,7 +2,7 @@
 
 ## Description: Script to checkout uos_[*] branch in catkin workspace
 #
-## Usage:       git-checkout.rb --br BranchName
+## Usage:       git-checkout.rb --br BranchName [options]
 #
 ## Dependency:
 #               sudo apt-get install ruby  (recommend ruby2.3 and above)
@@ -16,6 +16,8 @@ require 'open3'
 def parse_options(args)
     options = OpenStruct.new
     options.br = ""
+    options.reset = false
+    options.stash = false
     options.verb = false
 
     opt_parser = OptionParser.new do | opts |
@@ -25,6 +27,14 @@ def parse_options(args)
 
 	    opts.on("--br BranchName", String, "Branch name") do | name |
             options.br = name
+        end
+
+	    opts.on("--reset", "Reset hard to origin/Branch/HEAD") do
+            options.reset = true
+        end
+
+	    opts.on("--stash", "Auto stash uncommited changes") do
+            options.stash = true
         end
 
         opts.on("--verb", "Output trivial information") do
@@ -64,6 +74,27 @@ def repo_status_ok?(dir)
     if status.success?
         if not stdout_msg.match(/working directory clean/).nil?
             ok = true
+        elsif not stdout_msg.match(/Changes not staged for commit/).nil?
+            ok = @options.stash ? true : false
+        elsif not stdout_msg.match(/Untracked files/).nil?
+            ok = true
+        else
+            puts "#{stdout_msg}"
+        end
+    end
+    Dir.chdir(this_dir)
+    return ok
+end
+
+def repo_reset_ok?(dir)
+    ok = false
+    this_dir = Dir.pwd
+    Dir.chdir(dir)
+    puts "[EXEC CMD] git status" if @options.verb
+    stdout_msg, stderr_msg, status = Open3.capture3("git status")
+    if status.success?
+        if not stdout_msg.match(/can be fast-forwarded/).nil?
+            ok = true
         else
             puts "#{stdout_msg}"
         end
@@ -86,6 +117,7 @@ def branch_exist?(dir, brname)
     puts "Branch: #{brname} does not exist in #{dir}" unless ok
     return ok
 end
+
 
 # -------------------- main --------------------- #
 
@@ -136,11 +168,17 @@ UosComponents.each do |repo|
 
     next unless branch_exist?(repo_path, branch)
 
-    next if exec_capture("git stash") != 0
+    if @options.stash
+        next if exec_capture("git stash") != 0
+        puts ">>> Auto stash to #{repo} done."
+    end
 
     next if exec_capture("git checkout #{branch}") != 0
 
-    next if exec_capture("git reset --hard origin/#{branch}") != 0
+    if @options.reset and repo_reset_ok?(repo_path)
+        next if exec_capture("git reset --hard origin/#{branch}") != 0
+        puts ">>> Reset hard to #{repo} done."
+    end
 
     puts ">>> Checkout #{repo} to #{branch} succeeded.\n"
     repos_done << repo
