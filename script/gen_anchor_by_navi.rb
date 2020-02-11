@@ -130,7 +130,7 @@ end
 
 # -------------------- main --------------------- #
 
-FileExt = "tiff"
+FileExts = ["tiff", "png"]
 @options = parse_options(ARGV)
 
 exit 1 if @options.navilog.nil? || @options.imgdir.nil?
@@ -162,7 +162,11 @@ puts "   Collected #{@record_stream.count} navigation records"
 end
 
 puts " ---------------------- Processing image directory --------------------------- "
-@image_list = Dir[@options.imgdir + "/*." + FileExt].sort
+@image_list = []
+FileExts.each do | ext |
+  @image_list += Dir[@options.imgdir + "/*." + ext]
+end
+@image_list.sort!
 @image_ts_list = @image_list.map{ |p| p.match(/(\d{10}\.\d{3})/)[1] }
 puts "   Collected #{@image_ts_list.count} image files"
 
