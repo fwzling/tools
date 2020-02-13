@@ -15,6 +15,7 @@ require 'time'
 RECORD_LINE_REGEXPR = /^navi_log_output_data\:([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)\s([\-\d\.]+)/
 RAW_RECORD_LINE_REGEXPR = /^navi_log_input_data\:([\-\d\.\s[a-z]_]*)/
 LOG_VERSION_REGEXPR = /log version\:\s+([\d\.]+)/
+IMAGE_TS_REGEXPR = /(\d{10}\.\d{3})/
 
 # --- Return GPS raw data index --- #
 def get_gps_index(log_ver, field_name)
@@ -166,8 +167,9 @@ puts " ---------------------- Processing image directory -----------------------
 FileExts.each do | ext |
   @image_list += Dir[@options.imgdir + "/*." + ext]
 end
+@image_list.select!{ |p| (! p.match(IMAGE_TS_REGEXPR).nil?) }
 @image_list.sort!
-@image_ts_list = @image_list.map{ |p| p.match(/(\d{10}\.\d{3})/)[1] }
+@image_ts_list = @image_list.map{ |p| p.match(IMAGE_TS_REGEXPR)[1] }
 puts "   Collected #{@image_ts_list.count} image files"
 
 puts " ---------------------- Generate anchor list --------------------------- "
