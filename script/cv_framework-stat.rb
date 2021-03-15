@@ -12,7 +12,7 @@
 require 'descriptive_statistics'
 
 DEBUG_PRINT = false                # default off
-RegExpPattern = /vslam_callback.*Stream\[(\d)\].*FPS\[(\d+)\].*Clocks\[(\d+)\sms\].*Latency\[([\d\.]+)\]$/
+RegExpPattern = /vslam.*Stream\[(\d)\].*FPS\[(\d+)\].*Clocks\[(\d+)\sms\].*Latency\[([\d\.]+)\]$/
 
 # -------------------- main ---------------------- #
 logFile = ARGV[0]
@@ -72,9 +72,8 @@ puts "    Stream[1]: #{fpsStream_1.count}"
     next if stat.empty?
     puts ""
     puts subject 
-    puts "  Min:                #{stat.sort.first.round(3)}"
-    puts "  Max:                #{stat.sort.last.round(3)}"
     puts "  P10:                #{stat.percentile(10).round(3)}"
+    puts "  P50:                #{stat.percentile(50).round(3)}"
     puts "  P90:                #{stat.percentile(90).round(3)}"
     puts "  Average:            #{stat.mean.round(3)}"
     puts "  StdDev:             #{stat.standard_deviation.round(3)}"
